@@ -109,9 +109,11 @@ endfor
 function! s:GetHiAttr(name, attr)
     let vim_mode = "cterm"
     let attr_suffix = ""
-    if has("gui") || has('termguicolors')
-        let vim_mode = "gui"
-        let attr_suffix = "#"
+    if has ("gui_running")
+        if has("gui") || has('termguicolors')
+            let vim_mode = "gui"
+            let attr_suffix = "#"
+        endif
     endif
 
     let value = synIDattr(synIDtrans(hlID(a:name)), a:attr . attr_suffix, vim_mode)
@@ -121,8 +123,10 @@ endfunction
 
 function! s:SetHi(name, fg, bg)
     let vim_mode = "cterm"
-    if has("gui") || has("termguicolors")
-        let vim_mode = "gui"
+    if has ("gui_running")
+        if has("gui") || has("termguicolors")
+            let vim_mode = "gui"
+        endif
     endif
 
     let spec = ""
@@ -177,14 +181,24 @@ function! s:SetColors()
     for left in keys(g:buffet_has_separator)
         for right in keys(g:buffet_has_separator[left])
             let vim_mode = "cterm"
-            if has("gui") || has("termguicolors")
-                let vim_mode = "gui"
+            if has ("gui_running")
+                if has("gui_running") || has("termguicolors")
+                    let vim_mode = "gui"
+                endif
             endif
 
             let left_hi = g:buffet_prefix . left
             let right_hi = g:buffet_prefix . right
-            let left_bg = s:GetHiAttr(left_hi, 'bg')
-            let right_bg = s:GetHiAttr(right_hi, 'bg')
+            if s:GetHiAttr(left_hi, 'reverse')
+                let left_bg = s:GetHiAttr(left_hi, 'fg')
+            else
+                let left_bg = s:GetHiAttr(left_hi, 'bg')
+            endif
+            if s:GetHiAttr(right_hi, 'reverse')
+                let right_bg = s:GetHiAttr(right_hi, 'fg')
+            else
+                let right_bg = s:GetHiAttr(right_hi, 'bg')
+            endif
 
             if left_bg == ""
                 let left_bg = "NONE"
